@@ -1,6 +1,7 @@
 package sentiment
 
 import (
+	"fmt"
 	"math"
 	"strings"
 )
@@ -47,7 +48,23 @@ func (m Models) SentimentAnalysis(sentence string, lang Language) *Analysis {
 		})
 	}
 
-	analysis.Score = ScaleScores(m[lang].Predict(sentence), math.NaN(), lang)
+	// average sentences for total score
+	if class, P := m[lang].Probability(sentence); !math.IsNaN(P) {
+		fmt.Printf("Sentence: %v\tClass > Probability: %v > %v\n", sentence, int(class), P)
+		analysis.Score = ScaleScores(class, P, lang)
+	} else if len(analysis.Sentences) != 0 {
+		sum := float64(0)
+		for i := range analysis.Sentences {
+			sum += float64(analysis.Sentences[i].Score)
+		}
+		analysis.Score = uint8(math.Floor(sum / float64(len(analysis.Sentences))))
+	} else {
+		sum := float64(0)
+		for i := range analysis.Words {
+			sum += float64(analysis.Words[i].Score)
+		}
+		analysis.Score = uint8(math.Floor(sum / float64(len(analysis.Sentences))))
+	}
 
 	return analysis
 }
