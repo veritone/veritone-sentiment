@@ -21,10 +21,27 @@ func TestPositiveWordSentimentShouldPass1(t *testing.T) {
 	w := []string{"happy", "love", "happiness", "humanity", "awesome", "great", "fun", "super", "trust", "fearless", "creative", "dream", "good", "compassion", "joy", "independent", "success"}
 	for _, word := range w {
 		s := model.SentimentAnalysis(word, English)
-		if s.Score != uint8(1) {
+		if s.Score < uint8(5) {
 			t.Errorf("Sentiment of < %v > (returned %v) should be greater than 0.5!\n", word, s)
 		} else {
 			t.Logf("Sentiment of < %v > valid\n\tReturned %v\n", word, s)
+		}
+
+		if len(s.Words) == 0 {
+			t.Fatalf("Words returned should have individual sentiment\n\t%v\n", s)
+		}
+
+		for _, score := range s.Words {
+			if score.Score < uint8(5) {
+				t.Errorf("Probability of < %v > (returned %v) should be greater than 5 always!\n", score.Word, score.Score)
+			} else {
+				t.Logf("Probability of < %v > valid\n\tReturned %v\n", score.Word, score.Score)
+			}
+			if score.Probability == 0 {
+				t.Errorf("Probability of < %v > (returned %v) should be greater than 0.0 always!\n", score.Word, score.Score)
+			} else {
+				t.Logf("Probability of < %v > valid\n\tReturned %v\n", score.Word, score.Score)
+			}
 		}
 	}
 }
@@ -35,10 +52,27 @@ func TestNegativeWordSentimentShouldPass1(t *testing.T) {
 	w := []string{"not", "resent", "deplorable", "bad", "terrible", "hate", "scary", "terrible", "concerned", "wrong", "rude!!!", "sad", "horrible", "unimpressed", "useless", "offended", "disrespectful"}
 	for _, word := range w {
 		s := model.SentimentAnalysis(word, English)
-		if s.Score != uint8(0) {
+		if s.Score > uint8(5) {
 			t.Errorf("Sentiment of < %v > (returned %v) should be less than 0.5!\n", word, s)
 		} else {
 			t.Logf("Sentiment of < %v > valid\n\tReturned %v\n", word, s)
+		}
+
+		if len(s.Words) == 0 {
+			t.Fatalf("Words returned should have individual sentiment\n\t%v\n", s)
+		}
+
+		for _, score := range s.Words {
+			if score.Score > uint8(5) {
+				t.Errorf("Probability of < %v > (returned %v) should be less than 0.5 always!\n", score.Word, score.Score)
+			} else {
+				t.Logf("Probability of < %v > valid\n\tReturned %v\n", score.Word, score.Score)
+			}
+			if score.Probability == 0 {
+				t.Errorf("Probability of < %v > (returned %v) should be greater than 0.0 always!\n", score.Word, score.Score)
+			} else {
+				t.Logf("Probability of < %v > valid\n\tReturned %v\n", score.Word, score.Score)
+			}
 		}
 	}
 }
@@ -64,7 +98,7 @@ func TestPositiveSentenceSentimentShouldPass1(t *testing.T) {
 
 	for _, sentence := range w {
 		s := model.SentimentAnalysis(sentence, English)
-		if s.Score != uint8(1) {
+		if s.Score < uint8(5) {
 			t.Errorf("Sentiment of sentence < %v > (returned %v) should be greater than 0.5!\n", sentence, s)
 		} else {
 			t.Logf("Sentiment of sentence < %v > is valid.\n\tReturned %v\n", sentence, s)
@@ -93,7 +127,7 @@ func TestNegativeSentenceSentimentShouldPass1(t *testing.T) {
 
 	for _, sentence := range w {
 		s := model.SentimentAnalysis(sentence, English)
-		if s.Score != uint8(0) {
+		if s.Score > uint8(5) {
 			t.Errorf("Sentiment of sentence < %v > (returned %v) should be less than 0.5!\n", sentence, s)
 		} else {
 			t.Logf("Sentiment of sentence < %v > is valid.\n\tReturned %v\n", sentence, s)
@@ -107,7 +141,7 @@ func TestSentimentAnalysisShouldPass1(t *testing.T) {
 
 	analysis := model.SentimentAnalysis(transcript, English)
 
-	if analysis.Score != uint8(1) {
+	if analysis.Score < uint8(5) {
 		t.Errorf("Analysis of transcript should be greater than 0.5\n\treturned %v\n", analysis.Score)
 	} else {
 		t.Logf("Analysis of transcript was valid\n\treturned %v\n", analysis.Score)
@@ -133,7 +167,7 @@ func TestSentimentAnalysisShouldPass2(t *testing.T) {
 
 	analysis := model.SentimentAnalysis(transcript, English)
 
-	if analysis.Score != uint8(1) {
+	if analysis.Score < uint8(5) {
 		t.Errorf("Analysis of transcript should be greater than 0.5\n\treturned %v\n", analysis.Score)
 	} else {
 		t.Logf("Analysis of transcript was valid\n\treturned %v\n", analysis.Score)
@@ -153,7 +187,7 @@ func TestSentimentAnalysisShouldPass3(t *testing.T) {
 
 	analysis := model.SentimentAnalysis(transcript, English)
 
-	if analysis.Score != uint8(0) {
+	if analysis.Score > uint8(5) {
 		t.Errorf("Analysis of transcript should be less than 0.5\n\treturned %v\n", analysis.Score)
 	} else {
 		t.Logf("Analysis of transcript was valid\n\treturned %v\n", analysis.Score)
@@ -173,7 +207,7 @@ func TestSentimentAnalysisShouldPass4(t *testing.T) {
 
 	analysis := model.SentimentAnalysis(transcript, English)
 
-	if analysis.Score != uint8(0) {
+	if analysis.Score > uint8(5) {
 		t.Errorf("Analysis of transcript should be less than 0.5\n\treturned %v\n", analysis.Score)
 	} else {
 		t.Logf("Analysis of transcript was valid\n\treturned %v\n", analysis.Score)
@@ -193,7 +227,7 @@ func TestSentimentAnalysisShouldPass5(t *testing.T) {
 
 	analysis := model.SentimentAnalysis(transcript, English)
 
-	if analysis.Score != uint8(1) {
+	if analysis.Score < uint8(5) {
 		t.Errorf("Analysis of transcript should be greater than 0.5\n\treturned %v\n", analysis.Score)
 	} else {
 		t.Logf("Analysis of transcript was valid\n\treturned %v\n", analysis.Score)
@@ -212,7 +246,7 @@ func TestSentimentAnalysisShouldPass6(t *testing.T) {
 
 	analysis := model.SentimentAnalysis(transcript, English)
 
-	if analysis.Score != uint8(1) {
+	if analysis.Score < uint8(5) {
 		t.Errorf("Analysis of transcript should be greater than 0.5\n\treturned %v\n", analysis.Score)
 	} else {
 		t.Logf("Analysis of transcript was valid\n\treturned %v\n", analysis.Score)
@@ -231,7 +265,7 @@ func TestSentimentAnalysisShouldPass7(t *testing.T) {
 
 	analysis := model.SentimentAnalysis(transcript, English)
 
-	if analysis.Score != uint8(1) {
+	if analysis.Score < uint8(5) {
 		t.Errorf("Analysis of transcript should be greater than 0.5\n\treturned %v\n", analysis.Score)
 	} else {
 		t.Logf("Analysis of transcript was valid\n\treturned %v\n", analysis.Score)
@@ -257,7 +291,7 @@ func TestAssholeSentimentAnalysisShouldPass1(t *testing.T) {
 
 	analysis := model.SentimentAnalysis(transcript, English)
 
-	if analysis.Score != uint8(0) {
+	if analysis.Score > uint8(5) {
 		t.Errorf("Analysis of transcript should be less than 0.5\n\treturned %v\n", analysis.Score)
 	} else {
 		t.Logf("Analysis of transcript was valid\n\treturned %v\n", analysis.Score)

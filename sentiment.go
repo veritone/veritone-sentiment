@@ -26,22 +26,28 @@ func (m Models) SentimentAnalysis(sentence string, lang Language) *Analysis {
 		analysis.Sentences = []SentenceScore{}
 
 		for _, s := range sentences {
+			class, P := m[lang].Probability(s)
+
 			analysis.Sentences = append(analysis.Sentences, SentenceScore{
-				Sentence: s,
-				Score:    m[lang].Predict(s),
+				Sentence:    s,
+				Score:       ScaleScores(class, P, lang),
+				Probability: P,
 			})
 		}
 	}
 
 	w := strings.Split(sentence, " ")
 	for _, word := range w {
+		class, P := m[lang].Probability(word)
+
 		analysis.Words = append(analysis.Words, Score{
-			Word:  word,
-			Score: ScaleScoresm[lang].Predict(word),
+			Word:        word,
+			Score:       ScaleScores(class, P, lang),
+			Probability: P,
 		})
 	}
 
-	analysis.Score = m[lang].Predict(sentence)
+	analysis.Score = ScaleScores(m[lang].Predict(sentence), math.NaN(), lang)
 
 	return analysis
 }
@@ -58,11 +64,14 @@ func ScaleScores(class uint8, probability float64, lang Language) uint8 {
 		if class == uint8(0) {
 			P = 1 - P
 		}
+		if math.IsNaN(probability) {
+			P = float64(class)
+		}
 		P *= 10
 	default:
 		return uint8(0)
 	}
 
 	// bucket P into descrete values
-	return math.Floor(P)
+	return uint8(math.Floor(P))
 }
