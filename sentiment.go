@@ -1,6 +1,9 @@
 package sentiment
 
-import "strings"
+import (
+	"math"
+	"strings"
+)
 
 // SentimentAnalysis takes in a (possibly 'dirty')
 // sentence (or any block of text,) cleans the
@@ -34,11 +37,32 @@ func (m Models) SentimentAnalysis(sentence string, lang Language) *Analysis {
 	for _, word := range w {
 		analysis.Words = append(analysis.Words, Score{
 			Word:  word,
-			Score: m[lang].Predict(word),
+			Score: ScaleScoresm[lang].Predict(word),
 		})
 	}
 
 	analysis.Score = m[lang].Predict(sentence)
 
 	return analysis
+}
+
+// ScaleScores turns a class and it's probability
+// into a descretized version on {0,1,...,10} so
+// it'll be easier to plot
+func ScaleScores(class uint8, probability float64, lang Language) uint8 {
+	// scale P to reflect the values
+	var P float64
+	switch lang {
+	case English:
+		P = probability
+		if class == uint8(0) {
+			P = 1 - P
+		}
+		P *= 10
+	default:
+		return uint8(0)
+	}
+
+	// bucket P into descrete values
+	return math.Floor(P)
 }
