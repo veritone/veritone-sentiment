@@ -18,7 +18,6 @@ func (m Models) SentimentAnalysis(sentence string, lang Language) *Analysis {
 
 	analysis := &Analysis{
 		Language: lang,
-//		Words:    []Score{},
 		Score:    uint8(0),
 	}
 
