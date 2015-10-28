@@ -18,18 +18,19 @@ func (m Models) SentimentAnalysis(sentence string, lang Language) *Analysis {
 
 	analysis := &Analysis{
 		Language: lang,
-		Words:    []Score{},
+//		Words:    []Score{},
 		Score:    uint8(0),
 	}
 
 	sentences := strings.FieldsFunc(sentence, SplitSentences)
+	mySentences := []SentenceScore{}
+	myWords := []Score{}
 	if len(sentences) > 1 {
-		analysis.Sentences = []SentenceScore{}
 
 		for _, s := range sentences {
 			class, P := m[lang].Probability(s)
 
-			analysis.Sentences = append(analysis.Sentences, SentenceScore{
+			mySentences = append(mySentences, SentenceScore{
 				Sentence:    s,
 				Score:       ScaleScores(class, P, lang),
 				Probability: P,
@@ -41,7 +42,7 @@ func (m Models) SentimentAnalysis(sentence string, lang Language) *Analysis {
 	for _, word := range w {
 		class, P := m[lang].Probability(word)
 
-		analysis.Words = append(analysis.Words, Score{
+		myWords = append(myWords, Score{
 			Word:        word,
 			Score:       ScaleScores(class, P, lang),
 			Probability: P,
@@ -52,18 +53,18 @@ func (m Models) SentimentAnalysis(sentence string, lang Language) *Analysis {
 	if class, P := m[lang].Probability(sentence); !math.IsNaN(P) {
 		fmt.Printf("Sentence: %v\tClass > Probability: %v > %v\n", sentence, int(class), P)
 		analysis.Score = ScaleScores(class, P, lang)
-	} else if len(analysis.Sentences) != 0 {
+	} else if len(mySentences) != 0 {
 		sum := float64(0)
-		for i := range analysis.Sentences {
-			sum += float64(analysis.Sentences[i].Score)
+		for i := range mySentences {
+			sum += float64(mySentences[i].Score)
 		}
-		analysis.Score = uint8(math.Floor(sum / float64(len(analysis.Sentences))))
+		analysis.Score = uint8(math.Floor(sum / float64(len(mySentences))))
 	} else {
 		sum := float64(0)
-		for i := range analysis.Words {
-			sum += float64(analysis.Words[i].Score)
+		for i := range myWords {
+			sum += float64(myWords[i].Score)
 		}
-		analysis.Score = uint8(math.Floor(sum / float64(len(analysis.Sentences))))
+		analysis.Score = uint8(math.Floor(sum / float64(len(mySentences))))
 	}
 
 	return analysis

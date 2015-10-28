@@ -85,7 +85,5 @@ type SentenceScore struct {
 // code
 type Analysis struct {
 	Language  Language        `json:"lang"`
-	Words     []Score         `json:"words"`
-	Sentences []SentenceScore `json:"sentences,omitempty"`
 	Score     uint8           `json:"score"`
 }
